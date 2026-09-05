@@ -1,0 +1,47 @@
+services:
+  career-forge:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: career-forge
+    restart: unless-stopped
+    init: true
+    user: "1001:1001"
+    read_only: true
+    environment:
+      NODE_ENV: production
+      AUTH_MODE: authelia
+      AUTH_ALLOWED_GROUPS: "${CAREER_FORGE_AUTH_ALLOWED_GROUPS:-admins}"
+      HOSTNAME: 0.0.0.0
+      PORT: "3000"
+      DATABASE_PATH: /app/data/career-forge.db
+      CODEX_OAUTH_ENABLED: "${CODEX_OAUTH_ENABLED:-false}"
+      CREDENTIAL_ENCRYPTION_KEY: "${CAREER_FORGE_CREDENTIAL_ENCRYPTION_KEY:-}"
+      CODEX_MODEL: "${CODEX_MODEL:-gpt-5.6-sol}"
+    volumes:
+      - "${CAREER_FORGE_DATA_SOURCE:-career_forge_data}:/app/data"
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    networks:
+      - career_proxy
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: "${CAREER_FORGE_PROXY_NETWORK:-career_proxy}"
+      traefik.http.routers.career-forge.entrypoints: "${CAREER_FORGE_ENTRYPOINT:-websecure}"
+      traefik.http.routers.career-forge.rule: "Host(`${CAREER_FORGE_HOST:-career.example.com}`)"
+      traefik.http.routers.career-forge.middlewares: "${CAREER_FORGE_AUTH_MIDDLEWARE:-authelia@docker}"
+      traefik.http.routers.career-forge.tls.certresolver: "${CAREER_FORGE_CERT_RESOLVER:-letsencrypt}"
+      traefik.http.services.career-forge.loadbalancer.server.port: "3000"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+networks:
+  career_proxy:
+    name: "${CAREER_FORGE_PROXY_NETWORK:-career_proxy}"
+    external: true
+
+volumes:
+  career_forge_data:
+    name: "${CAREER_FORGE_DATA_VOLUME:-career_forge_data}"

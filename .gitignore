@@ -1,0 +1,14 @@
+node_modules
+.next
+coverage
+test-results
+playwright-report
+.env
+.env.*
+!.env.example
+*.log
+*.tsbuildinfo
+data/*
+!data/.gitkeep
+.DS_Store
+.hermes/

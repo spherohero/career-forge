@@ -1,0 +1,13 @@
+node_modules
+.next
+.git
+.github
+.hermes/
+coverage
+playwright-report
+test-results
+data
+*.log
+.env
+.env.*
+!.env.example

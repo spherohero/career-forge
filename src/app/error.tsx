@@ -1,0 +1,2 @@
+'use client';
+export default function ErrorPage({ reset }: { error: Error & { digest?: string }; reset: () => void }) { return <div className="page-stack"><section className="empty-state"><h1>Something slipped off the bench</h1><p>Your data was not intentionally changed. Try loading this workspace again.</p><button className="button button-primary" onClick={reset} type="button">Try again</button></section></div>; }

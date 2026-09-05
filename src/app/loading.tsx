@@ -1,0 +1,1 @@
+export default function Loading() { return <div className="page-stack" aria-live="polite"><div className="loading-block" /><div className="loading-block short" /><span className="sr-only">Loading Career Forge workspace…</span></div>; }

@@ -1,0 +1,54 @@
+{
+  "name": "career-forge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A private, evidence-first job search and resume tailoring workspace.",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "check": "npm run lint && npm run typecheck && npm run test && npm run build"
+  },
+  "dependencies": {
+    "@fontsource-variable/manrope": "^5.2.7",
+    "@fontsource-variable/jetbrains-mono": "^5.2.8",
+    "better-sqlite3": "13.0.3",
+    "cheerio": "^1.1.2",
+    "docx": "^9.5.1",
+    "lucide-react": "^0.542.0",
+    "mammoth": "^1.10.0",
+    "next": "16.3.4",
+    "pdf-lib": "^1.17.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "unpdf": "^1.4.0",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@playwright/test": "1.62.1",
+    "@testing-library/jest-dom": "^6.8.0",
+    "@testing-library/react": "^16.3.0",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^22.18.1",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
+    "@vitest/coverage-v8": "5.0.0",
+    "eslint": "^9.35.0",
+    "eslint-config-next": "16.3.4",
+    "jsdom": "^26.1.0",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "vitest": "5.0.0"
+  }
+}
