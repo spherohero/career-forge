@@ -1,20 +1,6 @@
 <div align="center">
 
-```text
-   +--------------------------------------------------+
-   |  C A R E E R   F O R G E                          |
-   |                                                  |
-   |       verified facts  ->  focused applications    |
-   |                         /\                       |
-   |                    ____/  \____                  |
-   |                    \__________/                  |
-   |                       |____|                     |
-   +--------------------------------------------------+
-```
-
-# Career Forge
-
-**Build your application around evidence, not invented qualifications.**
+![Career Forge — verified experience, focused applications](docs/assets/banner.svg)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Node.js: 22+](https://img.shields.io/badge/Node.js-22%2B-43853d.svg)](package.json)
@@ -27,7 +13,7 @@
 
 Career Forge is a self-hosted job-search workspace: maintain a verified career profile, compare it with a job's requirements, review targeted resume versions, and track applications in one place. Deterministic tailoring works without an AI account.
 
-The source is MIT-licensed and prepared for the intended repository [`spherohero/career-forge`](https://github.com/spherohero/career-forge). Public publication is a separate release gate. The live workspace remains private behind Authelia; source availability does not grant access to it.
+The source is publicly available under MIT at [`spherohero/career-forge`](https://github.com/spherohero/career-forge). The live workspace remains private behind Authelia; source availability does not grant access to it.
 
 > **Privacy boundary:** authorized users share the career workspace. Only Codex connections are per identity. Resume text, profiles, jobs, versions, and history are stored in plaintext SQLite—not an encrypted, multi-tenant vault.
 
