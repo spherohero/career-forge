@@ -51,6 +51,7 @@ export function JobWorkspace({
         <form action={updateStatusAction} className="compact-form">
           <input name="jobId" type="hidden" value={job.id} />
           <label htmlFor="status">Current stage</label>
+          <p className="form-help">Choosing Applied confirms you submitted an application and requests a one-time workbook update for your identity.</p>
           <select defaultValue={job.status} id="status" name="status">
             {jobStatusSchema.options.map((status) => <option key={status} value={status}>{status}</option>)}
           </select>

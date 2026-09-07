@@ -55,9 +55,17 @@ Actual production-mode UI with entirely fictional demonstration data. The tailor
 | Job workspace | Manual job entry, requirement normalization, evidence-linked fit analysis and gaps |
 | Tailoring | Deterministic plans, optional guarded model proposals, explicit accept/reject decisions |
 | Export | ATS-oriented DOCX/PDF layout with standard headings and selectable text; no guarantee of every ATS's behavior |
-| Tracker | Application status changes and event history |
+| Tracker | Application status history, public job-link preview, and per-identity app-owned Excel upload/append/download |
 | Settings | Experimental per-user Codex device authorization, model identifier text field, local disconnect |
 | Operations | SQLite persistence, trusted-proxy authorization, parameterized production Compose example |
+
+### Job links and your Excel tracker
+
+In **Profile → Excel workbook**, upload a partially filled `.xlsx` (up to 4 MiB) or create a blank tracker. Career Forge stores its own copy in SQLite; the original file is never modified and no cloud spreadsheet account or connection is used. [Workbook layout and limits](docs/application-tracker.md).
+
+In **Add role**, preview a public job link, edit the extracted fields, and save it. The **Have you applied?** dialog records Applied and appends a row only when you choose **Yes, I applied**. No, Close, and Escape leave it saved without a workbook write. Blocked or unsupported listings use the existing manual entry form. Choosing Applied in a workspace uses the same idempotent tracker service.
+
+Download the latest copy from Profile or a job workspace. Missing workbooks or failed writes retain a pending confirmation with a retry control; uploading does not backfill historical jobs. Workbooks are per identity; jobs and profile remain shared.
 
 ### AI assistance, deliberately constrained
 

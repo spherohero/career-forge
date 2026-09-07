@@ -11,6 +11,7 @@ import { extractResumeImport } from "@/lib/resume-import";
 import { jobStatusSchema } from "@/lib/domain";
 import { parseJobForm, parseProfileForm, type FormErrors } from "@/lib/forms";
 import { getRepository } from "@/server/database";
+import { ApplicationTracker } from "@/server/application-tracker";
 import { getCodexConnectionService, getCodexRuntimeStatus } from "@/server/codex-runtime";
 
 export interface ActionState {
@@ -89,14 +90,16 @@ export async function importResumeAction(
 }
 
 export async function updateJobStatusAction(formData: FormData): Promise<void> {
-  await requireActionAuthorization();
+  const identity = await requireActionAuthorization();
   const parsed = statusFormSchema.safeParse({
     jobId: formData.get("jobId"),
     status: formData.get("status"),
     note: formData.get("note") || undefined,
   });
   if (!parsed.success) throw new Error("Invalid status update.");
-  const updated = getRepository().updateJobStatus(parsed.data.jobId, parsed.data.status, parsed.data.note);
+  const updated = parsed.data.status === "applied"
+    ? (new ApplicationTracker(getRepository()).confirm(identity, parsed.data.jobId, parsed.data.note), true)
+    : getRepository().updateJobStatus(parsed.data.jobId, parsed.data.status, parsed.data.note);
   if (!updated) throw new Error("Job not found.");
   revalidatePath(`/jobs/${parsed.data.jobId}`);
   revalidatePath("/jobs");

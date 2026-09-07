@@ -58,6 +58,12 @@ With `MODEL_ALLOW_INSECURE_LOCAL=true`, HTTP is supported only for the code's re
 
 The Codex client uses fixed OpenAI HTTPS endpoints and disables redirects; these controls likewise do not substitute for host/network security.
 
+## Job-link and workbook boundaries
+
+Job-link import sends a credential-free request from the server to the submitted public URL. It restricts schemes/ports, rejects credentials and non-public IP ranges, validates all DNS results, pins the selected address for the socket, and repeats validation at every redirect. Requests have a total timeout, redirect limit and response-size limit. No browser cookies or model credentials are forwarded. This importer has a separate policy from administrator model endpoints described above. Use outbound firewall restrictions as defense in depth.
+
+Workbook routes derive ownership from authenticated headers, not submitted identity fields, and downloads use private/no-store caching. Workbook bytes and confirmation state are stored in SQLite, not in public files. They are **not encrypted**. Existing workbook formulas are preserved and can execute when opened in a spreadsheet application; this is not a workbook sanitizer or malware scanner. Only upload trusted files. See [supported layout and limits](application-tracker.md).
+
 ## Import and export boundaries
 
 Resume extraction accepts allowlisted PDF, DOCX, and TXT extension/MIME pairs up to 4 MiB. TXT must be valid UTF-8; PDF extraction requires selectable text, not scanned-image OCR. DOCX extraction is text-only. Parsing is lossy and imported text remains `pending_review`, separate from verified facts; review and manually attest before using it.

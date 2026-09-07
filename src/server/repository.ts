@@ -218,6 +218,26 @@ export class CareerRepository {
       CREATE INDEX IF NOT EXISTS events_job_idx
         ON application_events(job_id, sequence);
 
+      CREATE TABLE IF NOT EXISTS tracker_bytes (
+        revision TEXT PRIMARY KEY, bytes BLOB NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS tracker_workbooks (
+        owner TEXT PRIMARY KEY,
+        revision TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS tracker_applications (
+        owner TEXT NOT NULL,
+        job_id TEXT NOT NULL REFERENCES jobs(id),
+        applied_at TEXT NOT NULL,
+        synced_revision TEXT,
+        PRIMARY KEY(owner, job_id)
+      );
+      CREATE TABLE IF NOT EXISTS job_listing_details (
+        job_id TEXT PRIMARY KEY REFERENCES jobs(id),
+        data_json TEXT NOT NULL
+      );
+
       CREATE TABLE IF NOT EXISTS profiles (
         id TEXT PRIMARY KEY,
         data_json TEXT NOT NULL,
@@ -745,6 +765,77 @@ export class CareerRepository {
     return this.database.prepare(
       "DELETE FROM ai_device_flows WHERE id = ? AND identity = ?",
     ).run(id, canonicalizeIdentity(identity)).changes > 0;
+  }
+
+  storeTrackerBytes(revision: string, bytes: Uint8Array): void {
+    this.database.prepare("INSERT INTO tracker_bytes VALUES (?, ?)").run(revision, Buffer.from(bytes));
+  }
+
+  readTrackerBytes(revision: string): Uint8Array {
+    const row = this.database.prepare("SELECT bytes FROM tracker_bytes WHERE revision = ?").get(revision) as { bytes: Buffer } | undefined;
+    if (!row) throw new Error("Workbook data unavailable.");
+    return row.bytes;
+  }
+
+  downloadTrackerWorkbook(identity: string): Uint8Array | null {
+    // A single SELECT holds one SQLite snapshot across the owner/revision join.
+    const row = this.database.prepare(`SELECT b.bytes FROM tracker_workbooks AS w
+      JOIN tracker_bytes AS b ON b.revision = w.revision WHERE w.owner = ?`)
+      .get(canonicalizeIdentity(identity)) as { bytes: Buffer } | undefined;
+    return row?.bytes ?? null;
+  }
+
+  getTrackerWorkbook(identity: string): { revision: string; updated_at: string } | null {
+    return this.database.prepare('SELECT revision, updated_at FROM tracker_workbooks WHERE owner = ?').get(canonicalizeIdentity(identity)) as { revision: string; updated_at: string } | undefined ?? null;
+  }
+
+  installTrackerWorkbook(identity: string, write: () => string): void {
+    const owner = canonicalizeIdentity(identity);
+    if (!owner) throw new Error('Identity required.');
+    this.database.transaction(() => {
+      if (this.getTrackerWorkbook(owner)) throw new Error('A workbook already exists. Download the latest copy; replacement is disabled to protect its history.');
+      const revision = write();
+      this.database.prepare('INSERT INTO tracker_workbooks VALUES (?, ?, ?)').run(owner, revision, new Date().toISOString());
+    }).immediate();
+  }
+
+  recordApplied(identity: string, jobId: string, note?: string): void {
+    const owner = canonicalizeIdentity(identity);
+    if (!owner) throw new Error('Identity required.');
+    this.database.transaction(() => {
+      const job = this.getJob(jobId);
+      if (!job) throw new Error('Job not found.');
+      if (job.status !== 'applied') this.updateJobStatus(jobId, 'applied', note);
+      this.database.prepare('INSERT OR IGNORE INTO tracker_applications (owner, job_id, applied_at) VALUES (?, ?, ?)').run(owner, jobId, new Date().toISOString());
+    }).immediate();
+  }
+
+  pendingTrackerApplications(identity: string): Array<{ job_id: string; applied_at: string }> {
+    return this.database.prepare('SELECT job_id, applied_at FROM tracker_applications WHERE owner = ? AND synced_revision IS NULL ORDER BY applied_at').all(canonicalizeIdentity(identity)) as Array<{ job_id: string; applied_at: string }>;
+  }
+
+  syncTrackerApplication(identity: string, jobId: string, write: (revision: string, appliedAt: string) => string): void {
+    const owner = canonicalizeIdentity(identity);
+    this.database.transaction(() => {
+      const application = this.database.prepare('SELECT applied_at, synced_revision FROM tracker_applications WHERE owner = ? AND job_id = ?').get(owner, jobId) as { applied_at: string; synced_revision: string | null } | undefined;
+      if (!application) throw new Error('Confirm that you applied before writing to Excel.');
+      if (application.synced_revision) return;
+      const workbook = this.getTrackerWorkbook(owner);
+      if (!workbook) throw new Error('Upload or create your workbook in Profile, then retry.');
+      const revision = write(workbook.revision, application.applied_at);
+      this.database.prepare('UPDATE tracker_workbooks SET revision = ?, updated_at = ? WHERE owner = ?').run(revision, new Date().toISOString(), owner);
+      this.database.prepare('UPDATE tracker_applications SET synced_revision = ? WHERE owner = ? AND job_id = ?').run(revision, owner, jobId);
+      this.database.prepare('DELETE FROM tracker_bytes WHERE revision = ?').run(workbook.revision);
+    }).immediate();
+  }
+
+  saveListingDetails(jobId: string, details: Record<string, string>): void {
+    this.database.prepare('INSERT OR REPLACE INTO job_listing_details VALUES (?, ?)').run(jobId, JSON.stringify(details));
+  }
+
+  getListingDetails(jobId: string): Record<string, string> {
+    const row = this.database.prepare('SELECT data_json FROM job_listing_details WHERE job_id = ?').get(jobId) as { data_json: string } | undefined;
+    return row ? JSON.parse(row.data_json) : {};
   }
 
   close(): void {

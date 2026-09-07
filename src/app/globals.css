@@ -640,6 +640,13 @@ h3 {
   display: none;
 }
 
+.applied-dialog { width: min(480px, calc(100% - 32px)); padding: 28px; color: var(--ink); background: var(--paper-raised); border: 1px solid var(--line-strong); border-radius: var(--radius); box-shadow: var(--shadow); }
+.applied-dialog::backdrop { background: rgb(17 25 24 / 65%); }
+.applied-dialog p { margin: 0; line-height: 1.6; }
+.applied-dialog .text-link { justify-self: center; background: none; border: 0; cursor: pointer; }
+.workbook-panel { border-left: 4px solid var(--signal); }
+.workbook-panel input[type="file"] { max-width: 100%; }
+
 .narrow-page {
   max-width: 920px;
 }
