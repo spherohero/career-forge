@@ -28,8 +28,9 @@ export async function prepareResumeDownload(
   if (!parsedId.success) return errorResponse("Invalid resume version id.", 400);
   const version = repository.getResumeVersion(parsedId.data);
   if (!version) return errorResponse("Resume version not found.", 404);
-  const job = repository.getJob(version.jobId);
-  const profile = repository.getProfile();
+  const source = repository.getResumeSource(version.id);
+  const job = source?.job ?? repository.getJob(version.jobId);
+  const profile = source?.profile ?? repository.getProfile();
   if (!job || !profile) return errorResponse("Resume source data not found.", 404);
 
   const resume = assembleTailoredResume(profile, job, version);

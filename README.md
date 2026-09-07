@@ -40,11 +40,13 @@ Actual production-mode UI with entirely fictional demonstration data. The tailor
 
 ## Workflow
 
-1. **Establish the facts.** Enter skills, experience, projects, and education. Optionally extract a PDF, DOCX, or UTF-8 TXT resume into a separate `pending_review` draft; manually review and attest its facts.
+1. **Establish the facts.** Upload a PDF, DOCX, or UTF-8 TXT resume to prefill empty identity, contact, skills, and supported profile sections. Review the editable values against the extracted `pending_review` text, correct uncertain sections, then explicitly **Save verified profile**. Existing values and unsaved edits are preserved on reupload.
 2. **Add a job.** Paste the posting and review normalized requirements, weighted fit analysis, matching evidence, and gaps. A fit score is a heuristic, not a hiring prediction.
-3. **Generate a plan.** Select relevant verified achievements with stable source IDs. Optional model assistance passes through the same fail-closed validation boundary.
-4. **Review each proposal.** Accept or reject wording against its original evidence. Pending and rejected proposals retain the source wording.
-5. **Export and track.** Download a one-column, selectable-text DOCX or PDF from a resume version; update the application pipeline and event history.
+3. **Create a listing resume copy.** Capture the verified profile and listing in a separate saved snapshot. Optional model assistance passes through the same fail-closed validation boundary; creating another copy does not replace earlier copies.
+4. **Review each proposal.** Accept or reject wording against its original evidence. Pending and rejected proposals retain the source wording. Use **All copies for this listing** to revisit an earlier version.
+5. **Export and track.** Download a one-column, selectable-text DOCX or PDF from the selected copy. Later profile edits do not change its captured source. Downloads use a generated ATS layout, not the uploaded template. Update the application pipeline and event history separately.
+
+Parsing is conservative: ambiguous roles/dates may need manual entry; unknown fields remain blank. Imports retain extracted text, not an archived original file, so keep your original locally. Older plans created before snapshot support are explicitly labeled as using the current profile; create a new copy to freeze its source.
 
 ## What is implemented
 

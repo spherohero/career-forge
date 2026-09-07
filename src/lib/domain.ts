@@ -82,6 +82,7 @@ export const profileInputSchema = z.object({
   location: z.string().trim().max(160).default(""),
   headline: z.string().trim().max(240).default(""),
   summary: z.string().trim().max(3_000).default(""),
+  links: z.array(webUrlSchema).max(20).default([]),
   skills: z.array(
     z.object({
       id: optionalId,
@@ -179,6 +180,7 @@ export interface Profile {
   location: string;
   headline: string;
   summary: string;
+  links?: string[];
   skills: Skill[];
   experiences: Experience[];
   projects: Project[];

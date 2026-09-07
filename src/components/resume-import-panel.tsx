@@ -20,10 +20,10 @@ export function ResumeImportPanel({ latest }: { latest: ResumeImportView | null 
         <div><p className="eyebrow">Unverified import</p><h2 id="resume-import-heading">Bring in a resume draft</h2></div>
         <span className="unverified-label">Pending review</span>
       </div>
-      <p className="form-help">PDF, DOCX, or UTF-8 TXT, up to 4 MiB. Extraction never adds facts to your verified profile. Review and attest any facts yourself in the profile form below.</p>
+      <p className="form-help">PDF, DOCX, or UTF-8 TXT, up to 4 MiB. Upload prefills empty profile fields below for editable review. Existing values and unsaved edits are kept; ambiguous sections need manual correction. Review and attest each fact before saving. Your original file is never modified; generated copies use a new ATS layout, not the uploaded template.</p>
       <form action={action} className="import-form">
         <div><label htmlFor="resumeFile">Resume file</label><input accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" id="resumeFile" name="resumeFile" required type="file" /></div>
-        <button className="button button-secondary" disabled={pending} type="submit">{pending ? "Extracting…" : "Extract text"}</button>
+        <button className="button button-secondary" disabled={pending} type="submit">{pending ? "Extracting…" : "Upload & prefill profile"}</button>
       </form>
       <p aria-live="polite" className={state.success ? "success-message" : "form-message"}>{state.message}</p>
       {latest ? (

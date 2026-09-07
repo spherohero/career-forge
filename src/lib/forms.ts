@@ -123,6 +123,7 @@ export function parseProfileForm(formData: FormData): ParseResult<ProfileInput> 
     location: value(formData, "location"),
     headline: value(formData, "headline"),
     summary: value(formData, "summary"),
+    links: value(formData, "links").split(/\n/).map(link => link.trim()).filter(Boolean),
     skills,
     experiences,
     projects,

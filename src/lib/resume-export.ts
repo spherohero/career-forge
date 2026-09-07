@@ -67,7 +67,7 @@ export async function createResumeDocx(profile: Profile): Promise<Buffer> {
     new Paragraph({
       alignment: AlignmentType.CENTER,
       spacing: { after: 100 },
-      text: [profile.email, profile.phone, profile.location].filter(Boolean).join(" | "),
+      text: [profile.email, profile.phone, profile.location, ...(profile.links ?? [])].filter(Boolean).join(" | "),
     }),
   ];
   if (profile.headline) children.push(new Paragraph({ alignment: AlignmentType.CENTER, text: profile.headline }));
@@ -162,7 +162,7 @@ export async function createResumePdf(profile: Profile): Promise<Uint8Array> {
   const bullet = (text: string) => addLine(`- ${text}`, { indent: 10, gap: 1 });
 
   addLine(profile.fullName, { size: 18, bold: true, gap: 2 });
-  addLine([profile.email, profile.phone, profile.location].filter(Boolean).join(" | "), { size: 9.5, gap: 2 });
+  addLine([profile.email, profile.phone, profile.location, ...(profile.links ?? [])].filter(Boolean).join(" | "), { size: 9.5, gap: 2 });
   if (profile.headline) addLine(profile.headline, { size: 10.5 });
   if (profile.summary) { heading("Summary"); addLine(profile.summary); }
   const verifiedSkills = profile.skills.filter((item) => item.verified);

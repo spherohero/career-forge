@@ -8,6 +8,8 @@ interface JobWorkspaceProps {
   job: Job;
   profile: Profile | null;
   version: ResumeVersion | null;
+  versions?: ResumeVersion[];
+  hasSnapshot?: boolean;
   updateStatusAction?: FormAction;
   generatePlanAction?: FormAction;
   reviewSuggestionAction?: FormAction;
@@ -19,6 +21,8 @@ export function JobWorkspace({
   job,
   profile,
   version,
+  versions = [],
+  hasSnapshot = false,
   updateStatusAction = noop,
   generatePlanAction = noop,
   reviewSuggestionAction = noop,
@@ -77,8 +81,11 @@ export function JobWorkspace({
 
       <section className="panel tailoring-panel">
         <div className="section-heading"><div><p className="eyebrow">Per-job workspace</p><h2>Tailoring plan</h2>{version ? <p className="plan-mode">{version.mode === "ai" ? "AI-assisted · guarded" : "Deterministic"}</p> : null}</div>
-          {profile ? <form action={generatePlanAction}><input name="jobId" type="hidden" value={job.id} /><button className="button button-primary" type="submit">{version ? "Regenerate plan" : "Generate plan"}</button></form> : null}
+          {profile ? <form action={generatePlanAction}><input name="jobId" type="hidden" value={job.id} /><button className="button button-primary" type="submit">{version ? "Create another resume copy" : "Create listing resume copy"}</button></form> : null}
         </div>
+        <p className="form-help">Each copy belongs only to this listing. Your base profile, uploaded original and other listing copies stay unchanged. Accept supported suggestions to prioritize evidence; the claim guard does not permit new claims or semantic rewrites. Downloads use a generated ATS layout, not your uploaded template.</p>
+        {version ? <p><strong>{version.name}</strong> · {hasSnapshot ? "Saved profile snapshot" : "Legacy plan — uses current profile; create a new copy to freeze it"}</p> : null}
+        {versions.length > 1 ? <details><summary>All copies for this listing ({versions.length})</summary><ul>{versions.map(item => <li key={item.id}><a className="text-link" href={`/jobs/${job.id}?version=${item.id}`}>{item.name}</a></li>)}</ul></details> : null}
         {version ? <div className="export-actions" aria-label="Resume downloads"><a className="button button-secondary" href={`/api/resume/${version.id}/docx`}>Download DOCX</a><a className="button button-secondary" href={`/api/resume/${version.id}/pdf`}>Download PDF</a></div> : null}
         {version?.diagnostic ? <p className="model-diagnostic">Model output was not used ({version.diagnostic.replaceAll("_", " ")}); this complete plan is deterministic.</p> : null}
         {!version ? <p className="muted">Generate a guarded plan. When no valid model response is available, Career Forge fails closed to deterministic selection of verified claims.</p> : version.suggestions.length === 0 ? <p className="muted">No verified achievement bullets matched this role. Add evidence to your profile, then regenerate.</p> : (

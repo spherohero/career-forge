@@ -58,7 +58,9 @@ export async function saveProfileAction(
   await requireActionAuthorization();
   const parsed = parseProfileForm(formData);
   if (!parsed.success) return { errors: parsed.errors, message: "Review the highlighted fields." };
-  getRepository().saveProfile(parsed.data);
+  const repository = getRepository();
+  if (formData.has("expectedUpdatedAt") && formData.get("expectedUpdatedAt") !== (repository.getProfile()?.updatedAt ?? "")) return { message: "Profile changed in another tab. Reload and review before saving; your draft has not been applied." };
+  repository.saveProfile(parsed.data);
   revalidatePath("/");
   revalidatePath("/profile");
   return { success: true, message: "Verified profile saved." };
@@ -83,7 +85,7 @@ export async function importResumeAction(
       extractedText: extracted.text,
     });
     revalidatePath("/profile");
-    return { success: true, message: "Text extracted as an unverified draft. Review and attest facts below." };
+    return { success: true, message: "Profile fields prefilled as an unverified draft. Review, correct, then Save verified profile." };
   } catch (error) {
     return { message: error instanceof Error ? error.message : "Resume extraction failed." };
   }
@@ -131,7 +133,7 @@ export async function generatePlanAction(formData: FormData): Promise<void> {
     // Optional OAuth infrastructure must not block deterministic tailoring.
     provider = undefined;
   }
-  repository.createResumeVersion(job.id, await generateGuardedTailoringPlan(profile, job, analysis, { provider, env }));
+  repository.createResumeVersion(job.id, await generateGuardedTailoringPlan(profile, job, analysis, { provider, env }), profile);
   revalidatePath(`/jobs/${job.id}`);
 }
 

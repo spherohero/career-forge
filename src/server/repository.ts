@@ -255,6 +255,12 @@ export class CareerRepository {
         updated_at TEXT NOT NULL
       );
 
+      CREATE TABLE IF NOT EXISTS resume_sources (
+        version_id TEXT PRIMARY KEY REFERENCES resume_versions(id) ON DELETE CASCADE,
+        profile_json TEXT NOT NULL,
+        job_json TEXT NOT NULL
+      );
+
       CREATE INDEX IF NOT EXISTS resume_versions_job_idx
         ON resume_versions(job_id, sequence DESC);
 
@@ -414,6 +420,7 @@ export class CareerRepository {
       location: data.location,
       headline: data.headline,
       summary: data.summary,
+      links: data.links,
       skills: data.skills.map((skill) => ({
         id: skill.id ?? take(oldSkills, (item) => item.name.toLowerCase() === skill.name.toLowerCase())?.id ?? randomUUID(),
         name: skill.name,
@@ -505,7 +512,11 @@ export class CareerRepository {
     return row ? mapResumeImport(row) : null;
   }
 
-  createResumeVersion(jobId: string, plan: TailoringPlan): ResumeVersion {
+  createResumeVersion(jobId: string, plan: TailoringPlan, sourceProfile?: Profile): ResumeVersion {
+    return this.database.transaction(() => this.persistResumeVersion(jobId, plan, sourceProfile)).immediate();
+  }
+
+  private persistResumeVersion(jobId: string, plan: TailoringPlan, sourceProfile?: Profile): ResumeVersion {
     const job = this.getJob(jobId);
     if (!job) throw new Error("Cannot create a resume version for a missing job.");
     if (plan.jobId !== jobId) throw new Error("Tailoring plan job does not match.");
@@ -537,7 +548,18 @@ export class CareerRepository {
         version.createdAt,
         version.updatedAt,
       );
+    const profile = sourceProfile ?? this.getProfile();
+    if (profile) this.database.prepare("INSERT INTO resume_sources VALUES (?, ?, ?)").run(version.id, JSON.stringify(profile), JSON.stringify(job));
     return version;
+  }
+
+  getResumeSource(versionId: string): { profile: Profile; job: Job } | null {
+    const row = this.database.prepare("SELECT profile_json, job_json FROM resume_sources WHERE version_id = ?").get(versionId) as { profile_json: string; job_json: string } | undefined;
+    return row ? { profile: JSON.parse(row.profile_json), job: JSON.parse(row.job_json) } : null;
+  }
+
+  listResumeVersions(jobId: string): ResumeVersion[] {
+    return (this.database.prepare("SELECT plan_json FROM resume_versions WHERE job_id = ? ORDER BY sequence DESC").all(jobId) as { plan_json: string }[]).map(row => JSON.parse(row.plan_json));
   }
 
   getLatestResumeVersion(jobId: string): ResumeVersion | null {
